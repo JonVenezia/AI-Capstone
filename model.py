@@ -4,7 +4,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from sklearn import svm
-import fetch_data, convert_to_ts, fetch_ts, engineer_features
+from ingest import fetch_data, convert_to_ts, fetch_ts, engineer_features
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
@@ -14,13 +14,12 @@ from sklearn.linear_model import ElasticNet
 from sklearn.svm import SVR
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.metrics import mean_squared_error as mse
-
-#from logger import update_predict_log, update_train_log
+from update_log import update_predict_log, update_train_log
 
 ## model specific variables (iterate the version and note with each change)
 MODEL_DIR = "models"
 MODEL_VERSION = 0.1
-MODEL_VERSION_NOTE = "supervised learing model for time-series"
+MODEL_VERSION_NOTE = "supervised learning model for time-series"
 
 def _model_train(df,tag,test=False):
     """
@@ -115,13 +114,13 @@ def model_train(data_dir,test=False):
     
 def model_load(prefix='sl',data_dir=None,training=True):
     """
-    example funtion to load model
+    example function to load model
     
     The prefix allows the loading of different models
     """
 
     if not data_dir:
-        data_dir = os.path.join("..","data","cs-train")
+        data_dir = os.path.join(".","data","cs-train")
     
     models = [f for f in os.listdir(os.path.join(".","models")) if re.search("sl",f)]
 
@@ -274,7 +273,7 @@ if __name__ == "__main__":
 
     ## train the model
     print("TRAINING MODELS")
-    data_dir = os.path.join("..","data","cs-train")
+    data_dir = os.path.join(".","data","cs-train")
     model_train(data_dir,test=True)
 
     ## load the model
