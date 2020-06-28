@@ -101,7 +101,7 @@ gsutil==4.46
 h5py==2.10.0
 HeapDict==1.0.1
 html5lib==1.0.1
-httplib2==0.14.0
+httplib2==0.18.0
 hypothesis==5.4.1
 ibm-ai-openscale==2.2.1
 ibm-cloud-sdk-core==1.5.1
