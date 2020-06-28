@@ -6,7 +6,7 @@ Created on Mon Jun  8 21:04:34 2020
 @author: Jonathan.Venezia@ibm.com
 """
 
-import defaultdict
+from collections import defaultdict
 import numpy as np
 import pandas as pd
 
