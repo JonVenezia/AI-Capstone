@@ -12,7 +12,6 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import ElasticNet
 from sklearn.svm import SVR
-from sklearn.ensemble import AdaBoostRegressor
 from sklearn.metrics import mean_squared_error as mse
 from update_log import update_predict_log, update_train_log
 
@@ -212,45 +211,37 @@ def compare_models(directory, country):
                             ('svr', SVR())])
     pipe_rf = Pipeline(steps=[('scaler', StandardScaler()),
                             ('rf', RandomForestRegressor())])
-    pipe_ada = Pipeline(steps=[('scaler', StandardScaler()),
-                            ('ada', AdaBoostRegressor())])
     
     param_grid_lr = {
-        'lr_max_iter':[10000],
-        'lr_alpha': np.logspace(-3,0,5),
-        'lr_l1_ratio': np.linspace(0,1,5)
+        'lr__max_iter':[10000],
+        'lr__alpha': np.logspace(-3,0,5),
+        'lr__l1_ratio': np.linspace(0,1,5)
         }
     param_grid_svr = {
-        'svr_kernel': ['linear', 'poly', 'rbf','sigmoid'],
-        'svr_C': np.logspace(-2,2,5),
-        'svr_gamma':np.logspace(-3,0,4),
+        'svr__kernel': ['linear', 'poly', 'rbf','sigmoid'],
+        'svr__C': np.logspace(-2,2,5),
+        'svr__gamma':np.logspace(-3,0,4),
         }
     param_grid_rf = {
-        'rf_n_estimators': np.linspace(25,100,4,dtype='int'),
-        'rf_max_depth':np.linspace(6,15,4,dtype='int'),
-        'rf_min_samples_split':np.linspace(2,8,4,dtype='int')
-        }
-    param_grid_ada = {
-        'ada_learning_rate': np.logspace(-3,-1.5,5),
-        'ada_n_estimators':  np.linspace(25,100,4,dtype='int'),
-        'algorithm': ['SAMME', 'SAMME.R']
+        'rf__n_estimators': np.linspace(25,100,4,dtype='int'),
+        'rf__max_depth':np.linspace(6,15,4,dtype='int'),
+        'rf__min_samples_split':np.linspace(2,8,4,dtype='int')
         }
     
-    pipelines={
+    all_pipes={
         pipe_lr:param_grid_lr,
         pipe_svr:param_grid_svr,
         pipe_rf:param_grid_rf,
-        pipe_ada:param_grid_ada
     }
 
     time_start_all = time.time()
     results = []
-    for pipe in pipelines:
+    for pipe in all_pipes:
         time_start = time.time()
 
         pipe_name = '_'.join([step[0] for step in pipe.steps])
         print(f'Training {pipe_name}')
-        grid = GridSearchCV(pipe,param_grid=pipe,cv=5,n_jobs=-1,verbose=0)
+        grid = GridSearchCV(pipe,param_grid=all_pipes[pipe],cv=5,n_jobs=-1,verbose=0)
         grid.fit(X_train, y_train)
         y_pred = grid.predict(X_test)
         run_time = time.time()-time_start
@@ -264,27 +255,3 @@ def compare_models(directory, country):
     df = pd.DataFrame(results,columns=['pipeline','test_rmse','total_time','best_params'])
 
     return df
-
-if __name__ == "__main__":
-
-    """
-    basic test procedure for model.py
-    """
-
-    ## train the model
-    print("TRAINING MODELS")
-    data_dir = os.path.join(".","data","cs-train")
-    model_train(data_dir,test=True)
-
-    ## load the model
-    print("LOADING MODELS")
-    all_data, all_models = model_load()
-    print("... models loaded: ",",".join(all_models.keys()))
-
-    ## test predict
-    country='all'
-    year='2018'
-    month='01'
-    day='05'
-    result = model_predict(country,year,month,day)
-    print(result)

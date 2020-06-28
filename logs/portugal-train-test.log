@@ -1,0 +1,2 @@
+unique_id,timestamp,dt_range,eval_test,model_version,model_note,runtime
+0d6ec5e1-a220-4890-80dc-92c514012c4b,1593381087,"('2017-11-29', '2019-05-31')",{'rmse': 357.0},0.1,supervised learning model for time-series,000:00:12

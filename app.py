@@ -9,11 +9,10 @@ Created on Sun Jun 28 00:47:13 2020
 from flask import Flask, jsonify, request, send_from_directory
 import joblib
 import socket
-import json
 import pandas as pd
 import os
 import re
-from model import model_train,  model_predict
+from model import model_train, model_predict
 
 app = Flask(__name__)
 
@@ -26,34 +25,26 @@ def hello():
 @app.route('/predict', methods=['GET','POST'])
 def predict():
     
-    ## input checking
     if not request.json:
         print("ERROR: API (predict): did not receive request data")
         return jsonify([])
 
-    query = request.json
-    query = pd.DataFrame(query)
+    if 'query' not in request.json:
+        print("ERROR API (predict): received request, but no 'query' found within")
+        return jsonify([])
     
-    if len(query.shape) == 1:
-         query = query.reshape(1, -1)
-
-    y_pred = model.predict(query)
+    query = request.json['query']
+    
+    y_pred = model_predict(query)
     
     return(jsonify(y_pred.tolist()))
 
+@app.route('/train', methods=['GET','POST'])
 def train():
-    """
-    basic predict function for the API
-    the 'mode' flag provides the ability to toggle between a test version and a
-    production verion of training
-    """
-
-    ## check for request data
     if not request.json:
         print("ERROR: API (train): did not receive request data")
         return jsonify(False)
 
-    ## set the test flag
     test = False
     if 'mode' in request.json and request.json['mode'] == 'test':
         test = True
@@ -66,10 +57,6 @@ def train():
 
 @app.route('/logs/<filename>',methods=['GET'])
 def logs(filename):
-    """
-    API endpoint to get logs
-    """
-
     if not re.search(".log",filename):
         print("ERROR: API (log): file requested was not a log file: {}".format(filename))
         return jsonify([])
@@ -87,6 +74,4 @@ def logs(filename):
     return send_from_directory(log_dir, filename, as_attachment=True)        
             
 if __name__ == '__main__':
-    saved_model = 'aavail-rf.joblib'
-    model = joblib.load(saved_model)
     app.run(host='0.0.0.0', port=8080,debug=True)
