@@ -7,19 +7,11 @@ Created on Sat Jun 27 22:46:29 2020
 """
 
 import os
-import sys
 import re
 import shutil
-import time
-import pickle
 from collections import defaultdict
-from datetime import datetime
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from pandas.plotting import register_matplotlib_converters
-register_matplotlib_converters()
 
 COLORS = ["darkorange","royalblue","slategrey"]
 

@@ -6,13 +6,17 @@ Created on Sun Jun 28 00:47:13 2020
 @author: Jonathan.Venezia@ibm.com
 """
 
-from flask import Flask, jsonify, request, send_from_directory
-import joblib
-import socket
-import pandas as pd
+import argparse
+from flask import Flask, jsonify, request
+from flask import render_template, send_from_directory
 import os
 import re
+import numpy as np
+
 from model import model_train, model_predict
+with open('__version__','r+') as f:
+    MODEL_VERSION = f.read()
+    f.close
 
 app = Flask(__name__)
 
@@ -24,7 +28,6 @@ def hello():
 
 @app.route('/predict', methods=['GET','POST'])
 def predict():
-    
     if not request.json:
         print("ERROR: API (predict): did not receive request data")
         return jsonify([])
@@ -35,9 +38,17 @@ def predict():
     
     query = request.json['query']
     
-    y_pred = model_predict(query)
-    
-    return(jsonify(y_pred.tolist()))
+    _result = model_predict(*query)
+
+    result = {}
+
+    for key,item in _result.items():
+        if isinstance(item,np.ndarray):
+            result[key] = item.tolist()
+        else:
+            result[key] = item
+
+    return(jsonify(result["y_pred"]))
 
 @app.route('/train', methods=['GET','POST'])
 def train():
@@ -45,6 +56,7 @@ def train():
         print("ERROR: API (train): did not receive request data")
         return jsonify(False)
 
+    ## set the test flag
     test = False
     if 'mode' in request.json and request.json['mode'] == 'test':
         test = True
@@ -71,7 +83,7 @@ def logs(filename):
         print("ERROR: API (log): file requested could not be found: {}".format(filename))
         return jsonify([])
 
-    return send_from_directory(log_dir, filename, as_attachment=True)        
-            
+    return send_from_directory(log_dir, filename, as_attachment=True)
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080,debug=True)
+    app.run(host='0.0.0.0', threaded=True, port=8080)
